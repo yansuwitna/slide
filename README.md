@@ -132,6 +132,32 @@ npx next start -p 4000
 
 ---
 
+## 🛠️ Troubleshooting VPS (Gagal Upload Presentasi)
+
+Jika Anda mengalami kendala **tidak bisa membuat presentasi** (file PDF gagal di-upload) setelah di-deploy ke VPS, periksa 3 hal berikut:
+
+### 1. Batas Upload Next.js (Sudah Diperbaiki)
+Secara default, Next.js membatasi upload hingga 1MB. Namun, ini sudah diatasi dengan penambahan konfigurasi di `next.config.mjs` (`bodySizeLimit: '50mb'`).
+👉 **Solusi:** Pastikan Anda sudah menarik pembaruan kode ini ke VPS, lalu jalankan `npm run build` dan `pm2 restart edupresent` (atau sesuai nama PM2 Anda).
+
+### 2. Batas Upload NGINX
+Jika VPS Anda menggunakan Nginx sebagai *Reverse Proxy*, Nginx akan memblokir file lebih dari 1MB (Error `413 Request Entity Too Large`).
+👉 **Solusi:** Buka konfigurasi Nginx Anda (`/etc/nginx/sites-available/default` atau `/etc/nginx/nginx.conf`) dan tambahkan baris ini di dalam blok `server` atau `http`:
+```nginx
+client_max_body_size 50M;
+```
+Lalu restart Nginx: `sudo systemctl restart nginx`
+
+### 3. Izin Akses Folder (Permissions)
+Aplikasi butuh akses untuk membuat file di dalam folder `public/uploads`.
+👉 **Solusi:** Jalankan perintah berikut di folder proyek Anda di VPS:
+```bash
+mkdir -p public/uploads
+chmod -R 775 public/uploads
+```
+
+---
+
 ## 🧑‍💻 Hak Akses & Akun Default
 - **Login Admin**
   - Username: `admin`

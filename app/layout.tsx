@@ -4,10 +4,27 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "EduPresent",
-  description: "Platform Presentasi Interaktif untuk Guru dan Siswa",
-};
+import prisma from "@/lib/db";
+
+export async function generateMetadata(): Promise<Metadata> {
+  let appName = "EduPresent";
+  let appDesc = "Platform Presentasi Interaktif untuk Guru dan Siswa";
+
+  try {
+    const nameSetting = await prisma.setting.findUnique({ where: { key: "appName" } });
+    if (nameSetting) appName = nameSetting.value;
+
+    const descSetting = await prisma.setting.findUnique({ where: { key: "appDesc" } });
+    if (descSetting) appDesc = descSetting.value;
+  } catch (error) {
+    // Abaikan error (berguna saat build pertama kali jika DB belum siap)
+  }
+
+  return {
+    title: appName,
+    description: appDesc,
+  };
+}
 
 export default function RootLayout({
   children,
