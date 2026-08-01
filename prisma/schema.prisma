@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  username      String         @unique
+  password      String
+  name          String         @default("")
+  presentations Presentation[]
+}
+
+model Presentation {
+  id           String        @id @default(cuid())
+  teacherId    String
+  teacher      User          @relation(fields: [teacherId], references: [id])
+  token        String        @unique
+  title        String
+  type         String        // 'pdf' or 'drive'
+  filePath     String
+  currentPage  Int           @default(1)
+  createdAt    DateTime      @default(now())
+  participants Participant[]
+}
+
+model Participant {
+  id             String       @id @default(cuid())
+  presentationId String
+  presentation   Presentation @relation(fields: [presentationId], references: [id], onDelete: Cascade)
+  name           String
+  joinedAt       DateTime     @default(now())
+  lastSeen       DateTime     @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}

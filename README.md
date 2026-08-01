@@ -1,0 +1,110 @@
+# EduPresent 🎓
+
+EduPresent adalah sebuah platform web presentasi interaktif dan *real-time* yang dirancang khusus untuk memudahkan interaksi antara Guru dan Siswa. Aplikasi ini memungkinkan Guru untuk membagikan halaman PDF presentasi secara tersinkronisasi, dan siswa dapat melihat halaman tersebut bergeser secara *real-time* di layar mereka masing-masing.
+
+## 🌟 Fitur Utama
+- **Sinkronisasi Presentasi Real-Time:** Halaman presentasi siswa otomatis berpindah saat guru memindahkan halamannya.
+- **Pelacakan Fokus Siswa (Real-Time Radar):** Guru dapat melihat secara langsung siapa saja siswa yang sedang fokus membuka presentasi. Jika siswa berpindah tab browser, namanya akan menghilang dari layar guru dalam 2 detik.
+- **Skala Besar (In-Memory Presence):** Kehadiran siswa dilacak sepenuhnya melalui RAM (*Node.js Global State*), sehingga tidak membebani database dan aman untuk digunakan di tingkat sekolah.
+- **Dashboard Admin:** Admin dapat memantau pendaftaran guru, me-reset *password*, menghapus guru, dan merubah slogan aplikasi.
+- **Auto-Logout Siswa:** Saat presentasi ditutup (*Keluar*) oleh Guru, seluruh kelas siswa otomatis dibubarkan.
+
+---
+
+## 🚀 Panduan Instalasi (Development Lokal)
+
+Jika Anda ingin menjalankan aplikasi ini di komputer lokal Anda:
+
+1. **Clone & Install Dependencies**
+   ```bash
+   git clone <repo-url>
+   cd presentasi
+   npm install
+   ```
+
+2. **Siapkan Database SQLite**
+   Karena aplikasi ini menggunakan Prisma + SQLite, Anda wajib me-sinkronisasi strukturnya terlebih dahulu.
+   ```bash
+   npx prisma db push
+   ```
+
+3. **Jalankan Aplikasi**
+   ```bash
+   npm run dev
+   ```
+   Aplikasi akan berjalan di `http://localhost:3000`.
+
+---
+
+## 🌍 Panduan Deployment / Hosting (menggunakan PM2)
+
+Jika Anda ingin meng-hosting aplikasi ini di VPS (Virtual Private Server) agar bisa diakses seluruh sekolah secara 24 jam penuh tanpa terputus, Anda sangat disarankan menggunakan **PM2** (Process Manager).
+
+### Prasyarat di Server:
+- Node.js (versi 18+)
+- NPM
+- PM2 terinstal secara global (`npm install -g pm2`)
+
+### Langkah-Langkah Menjalankan EduPresent di PM2:
+
+**1. Masuk ke direktori proyek Anda**
+```bash
+cd /lokasi/folder/presentasi
+```
+
+**2. Install seluruh package (jika belum)**
+```bash
+npm install
+```
+
+**3. Buat dan siapkan Database Production**
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+**4. Build Aplikasi Next.js**
+(Ini wajib dilakukan sebelum menjalankan Next.js di mode *Production*).
+```bash
+npm run build
+```
+
+**5. Jalankan Aplikasi dengan PM2**
+Jalankan aplikasi di *background* menggunakan nama **edupresent** (atau sesuka Anda).
+```bash
+pm2 start npm --name "edupresent" -- start
+```
+
+### 💡 Perintah Berguna PM2 Lainnya:
+
+- **Melihat status aplikasi:**
+  ```bash
+  pm2 status
+  ```
+- **Melihat log (jika ada error):**
+  ```bash
+  pm2 logs edupresent
+  ```
+- **Me-restart aplikasi (Misal setelah ada update):**
+  ```bash
+  pm2 restart edupresent
+  ```
+- **Mematikan aplikasi:**
+  ```bash
+  pm2 stop edupresent
+  ```
+- **Menyimpan daftar PM2 agar otomatis menyala (auto-start) ketika VPS di-restart:**
+  ```bash
+  pm2 save
+  pm2 startup
+  ```
+
+---
+
+## 🧑‍💻 Hak Akses & Akun Default
+- **Login Admin**
+  - Username: `admin`
+  - Password: `1`
+- Akun Guru dapat didaftarkan secara bebas melalui halaman `/teacher/register`.
+
+> **Catatan Server/VPS:** File presentasi (PDF) yang diupload disimpan di dalam folder `public/uploads/`. Pastikan folder ini aman dan tidak terhapus saat Anda melakukan *redeployment*.
