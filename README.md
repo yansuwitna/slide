@@ -76,6 +76,21 @@ pm2 start ecosystem.config.js
 ```
 *(Pastikan Anda telah membuat file `ecosystem.config.js` di folder proyek Anda)*
 
+**Alternatif: Menjalankan PM2 Langsung dengan Custom Port**
+Jika Anda tidak ingin membuat file konfigurasi, Anda bisa menyisipkan port langsung saat menjalankan PM2.
+
+Menggunakan Environment Variable `PORT` (Biasa di Linux/Mac):
+```bash
+PORT=3001 pm2 start npm --name "aplikasi-ku" -- start
+```
+
+Atau meneruskan argumen port (`-p`) ke script Next.js:
+```bash
+pm2 start npm --name "aplikasi-ku" -- start -- -p 3001
+```
+
+*(Catatan: Jika Anda menggunakan server file kustom seperti `app.js`, perintahnya adalah `PORT=3001 pm2 start app.js --name "aplikasi-ku"` atau `pm2 start app.js --name "aplikasi-ku" -- --port 3001`)*
+
 ---
 
 ## ⚙️ Menjalankan Tanpa PM2 dengan Custom Port
