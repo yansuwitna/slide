@@ -70,10 +70,26 @@ npm run build
 ```
 
 **5. Jalankan Aplikasi dengan PM2**
-Jalankan aplikasi di *background* menggunakan nama **edupresent** (atau sesuka Anda).
+Cara terbaik menjalankan aplikasi di *background* adalah menggunakan file konfigurasi PM2:
 ```bash
-pm2 start npm --name "edupresent" -- start
+pm2 start ecosystem.config.js
 ```
+*(Pastikan Anda telah membuat file `ecosystem.config.js` di folder proyek Anda)*
+
+---
+
+## ⚙️ Menjalankan Tanpa PM2 dengan Custom Port
+
+Jika Anda tidak ingin menggunakan PM2 dan ingin menentukan port sesuai keinginan secara manual (contoh: port `4000`), Anda dapat menggunakan perintah berikut:
+
+```bash
+npm run start -- -p 4000
+```
+Atau menggunakan `npx`:
+```bash
+npx next start -p 4000
+```
+*(Catatan: Pastikan Anda sudah menjalankan `npm run build` sebelum menggunakan perintah di atas)*
 
 ### 💡 Perintah Berguna PM2 Lainnya:
 

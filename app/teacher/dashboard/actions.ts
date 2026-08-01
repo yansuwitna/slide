@@ -16,7 +16,7 @@ export async function createPresentationAction(formData: FormData) {
   const file = formData.get("file") as File;
   
   if (!file || file.size === 0) {
-    return { error: "File PDF harus diupload" };
+    throw new Error("File PDF harus diupload");
   }
   
   const bytes = await file.arrayBuffer();

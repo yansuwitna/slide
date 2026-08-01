@@ -21,7 +21,7 @@ export function getActiveStudents(presentationId: string, maxAgeMs = 10000): str
   const now = Date.now();
   const active: string[] = [];
 
-  for (const [key, lastSeen] of activeStudentsMap.entries()) {
+  activeStudentsMap.forEach((lastSeen, key) => {
     // Jika data ini milik presentasi yang sedang dicek
     if (key.startsWith(`${presentationId}::`)) {
       if (now - lastSeen <= maxAgeMs) {
@@ -32,7 +32,7 @@ export function getActiveStudents(presentationId: string, maxAgeMs = 10000): str
         activeStudentsMap.delete(key);
       }
     }
-  }
+  });
 
   return active;
 }
