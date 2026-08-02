@@ -39,6 +39,16 @@ export async function GET(
   
   if (role === "teacher" && currentTeacherId === presentation.teacherId) {
     try {
+      // Jika presentasi sebelumnya sudah ditutup (isActive = false), tapi guru membukanya lagi dari riwayat
+      // maka otomatis kita aktifkan kembali agar siswa bisa masuk.
+      if (!presentation.isActive) {
+        await prisma.presentation.update({
+          where: { id: presentation.id },
+          data: { isActive: true }
+        });
+        presentation.isActive = true; // update local object
+      }
+
       await markTeacherActive(presentation.id);
       
       const timeoutSetting = await prisma.setting.findUnique({ where: { key: "presenceTimeout" } });
