@@ -16,6 +16,23 @@ export async function registerTeacher(formData: FormData) {
     return { error: "Semua field harus diisi" };
   }
 
+  // Validasi Password Kuat
+  if (password.length < 8) {
+    return { error: "Password minimal harus 8 karakter" };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { error: "Password harus mengandung minimal satu huruf kapital (A-Z)" };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { error: "Password harus mengandung minimal satu huruf kecil (a-z)" };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { error: "Password harus mengandung minimal satu angka (0-9)" };
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return { error: "Password harus mengandung minimal satu karakter unik/spesial (contoh: !@#$)" };
+  }
+
   try {
     const user = await prisma.user.create({
       data: { username, password, name }, // Hashing is skipped for simplicity in this demo, but should be added
