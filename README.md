@@ -149,5 +149,5 @@ sudo nano /etc/nginx/nginx.conf
 
 
 # Gabungan
-git pull && pm2 stop layar && rm -rf .next && npm run build && pm2 start layar
+git pull && pm2 stop slide && rm -rf .next && npm run build && pm2 start slide
 ```
