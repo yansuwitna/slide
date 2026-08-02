@@ -1,6 +1,30 @@
 import prisma from "./db";
+import { redis } from "./redis";
+
+const globalAny: any = global;
+export const lastWriteMap: Map<string, number> = globalAny.lastWriteMap || new Map();
+
+if (process.env.NODE_ENV !== "production") {
+  globalAny.lastWriteMap = lastWriteMap;
+}
 
 export async function markStudentActive(presentationId: string, deviceId: string, studentName: string) {
+  // 1. Instant update to Redis for real-time presence
+  const redisKey = `pres:${presentationId}:students`;
+  await redis.hset(redisKey, deviceId, JSON.stringify({ name: studentName, lastSeen: Date.now() }));
+  await redis.expire(redisKey, 86400); // Auto cleanup after 24h
+
+  // 2. Debounced update to Database for history
+  const key = `${presentationId}::${deviceId}`;
+  const now = Date.now();
+  const lastWrite = lastWriteMap.get(key) || 0;
+
+  if (now - lastWrite < 10000) {
+    return; // Skip DB write if written recently
+  }
+
+  lastWriteMap.set(key, now);
+
   const existing = await prisma.participant.findFirst({
     where: { presentationId, deviceId }
   });
@@ -17,38 +41,41 @@ export async function markStudentActive(presentationId: string, deviceId: string
   }
 }
 
-export async function getActiveStudents(presentationId: string, maxAgeMs = 3000): Promise<{ name: string, isFocused: boolean }[]> {
-  const participants = await prisma.participant.findMany({
-    where: { presentationId }
-  });
-
+export async function getActiveStudents(presentationId: string, maxAgeMs = 15000): Promise<{ name: string, isFocused: boolean }[]> {
+  const redisKey = `pres:${presentationId}:students`;
+  const allStudents = await redis.hgetall(redisKey);
+  
   const now = Date.now();
   const students: { name: string, isFocused: boolean }[] = [];
 
-  for (const p of participants) {
-    const isFocused = now - p.lastSeen.getTime() <= maxAgeMs;
-    // Tampilkan jika pernah join (bisa diatur jika ingin menyembunyikan yg tidak aktif lama)
-    // Untuk saat ini kita tampilkan semua, isFocused akan menentukan status online
-    students.push({
-      name: p.name,
-      isFocused
-    });
+  for (const [deviceId, dataStr] of Object.entries(allStudents)) {
+    try {
+      const data = JSON.parse(dataStr);
+      const isFocused = now - data.lastSeen <= maxAgeMs;
+      students.push({
+        name: data.name,
+        isFocused
+      });
+    } catch (e) {
+      console.error("Error parsing student data from Redis", e);
+    }
   }
 
   return students;
 }
 
 export async function markTeacherActive(presentationId: string) {
-  // Hanya memperbarui timestamp di level presentasi jika diperlukan, 
-  // namun umumnya isActive di presentation sudah cukup.
+  // Optional: Track teacher active status in Redis
+  await redis.set(`pres:${presentationId}:teacher`, "active", "EX", 30);
 }
 
 export async function markTeacherClosed(presentationId: string) {
-  // Siswa akan otomatis dihapus jika menggunakan onDelete: Cascade (jika presentation dihapus),
-  // atau biarkan saja data partisipan tersimpan sebagai riwayat.
+  await redis.del(`pres:${presentationId}:teacher`);
+  await redis.del(`pres:${presentationId}:students`);
 }
 
 export async function isTeacherActive(presentationId: string): Promise<boolean> {
+  // Always check DB as source of truth
   const pres = await prisma.presentation.findUnique({
     where: { id: presentationId },
     select: { isActive: true }

@@ -62,18 +62,31 @@ mkdir -p public/uploads
 chmod -R 775 public/uploads
 ```
 
-### Langkah 4: Instalasi & Database
-```bash
-# Install paket Node.js
-npm install
-
-# Buat kerangka database
-npx prisma generate
-npx prisma db push
-```
+### Langkah 4: Instalasi Redis & Database
+Aplikasi ini menggunakan **Redis** untuk melacak kehadiran ribuan siswa secara sinkron dan instan (real-time) di seluruh proses PM2.
+1. Install Redis di VPS (Ubuntu/Debian):
+   ```bash
+   sudo apt update
+   sudo apt install redis-server
+   sudo systemctl enable redis-server
+   sudo systemctl start redis-server
+   ```
+2. Buat file `.env` di folder `presentasi` jika belum ada, dan tambahkan koneksi Redis (biarkan default jika Redis Anda berjalan di port standar tanpa password):
+   ```bash
+   REDIS_URL="redis://localhost:6379"
+   ```
+3. Install paket Node.js:
+   ```bash
+   npm install
+   ```
+4. Buat kerangka database SQLite:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
 
 ### Langkah 5: Build Aplikasi
-**Perhatian:** Langkah ini WAJIB dilakukan setelah Anda mengedit file `next.config.mjs`. Jika Anda belum menjalankan perintah ini, konfigurasi keamanan domain di atas tidak akan aktif!
+**Perhatian:** Langkah ini WAJIB dilakukan setelah Anda mengedit file `next.config.mjs` atau merubah sumber data (Redis/Database). Jika Anda belum menjalankan perintah ini, konfigurasi keamanan domain tidak akan aktif!
 ```bash
 npm run build
 ```

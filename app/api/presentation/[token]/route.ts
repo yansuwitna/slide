@@ -33,8 +33,8 @@ export async function GET(
   if (role === "teacher" && currentTeacherId === presentation.teacherId) {
     await markTeacherActive(presentation.id);
     
-    // 2000ms = 2 detik toleransi (super ketat)
-    activeStudents = await getActiveStudents(presentation.id, 2000);
+    // 15000ms = 15 detik toleransi untuk mengurangi beban database
+    activeStudents = await getActiveStudents(presentation.id, 15000);
   } else {
     // Siswa sedang meminta data -> Cek apakah guru sudah menekan Keluar (Tutup)
     if (presentation.isActive === false) {
