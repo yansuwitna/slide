@@ -40,8 +40,8 @@ export async function GET(
   if (role === "teacher" && currentTeacherId === presentation.teacherId) {
     try {
       await markTeacherActive(presentation.id);
-      // 15000ms = 15 detik toleransi untuk mengurangi beban database
-      activeStudents = await getActiveStudents(presentation.id, 15000);
+      // 2000ms = 2 detik toleransi (sangat cepat mendeteksi siswa tidak aktif/pindah tab)
+      activeStudents = await getActiveStudents(presentation.id, 2000);
     } catch (e) {
       console.error("Error fetching from Redis:", e);
     }
