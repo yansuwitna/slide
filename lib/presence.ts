@@ -17,24 +17,31 @@ export function markStudentActive(presentationId: string, studentName: string) {
   activeStudentsMap.set(`${presentationId}::${studentName}`, Date.now());
 }
 
-export function getActiveStudents(presentationId: string, maxAgeMs = 10000): string[] {
+export function getActiveStudents(presentationId: string, maxAgeMs = 3000): { name: string, isFocused: boolean }[] {
   const now = Date.now();
-  const active: string[] = [];
+  const students: { name: string, isFocused: boolean }[] = [];
 
   activeStudentsMap.forEach((lastSeen, key) => {
     // Jika data ini milik presentasi yang sedang dicek
     if (key.startsWith(`${presentationId}::`)) {
-      if (now - lastSeen <= maxAgeMs) {
-        // Siswa aktif dalam batas waktu, ambil namanya
-        active.push(key.split('::')[1]);
-      } else {
-        // Jika sudah lebih dari batas waktu, hapus dari memori untuk menghemat RAM
-        activeStudentsMap.delete(key);
-      }
+      const isFocused = now - lastSeen <= maxAgeMs;
+      // Jangan hapus dari memori, tetap kembalikan tapi dengan isFocused = false
+      students.push({
+        name: key.split('::')[1],
+        isFocused,
+      });
     }
   });
 
-  return active;
+  return students;
+}
+
+export function clearPresentationStudents(presentationId: string) {
+  activeStudentsMap.forEach((_, key) => {
+    if (key.startsWith(`${presentationId}::`)) {
+      activeStudentsMap.delete(key);
+    }
+  });
 }
 
 export function markTeacherActive(presentationId: string) {
@@ -45,6 +52,9 @@ export function markTeacherActive(presentationId: string) {
 export function markTeacherClosed(presentationId: string) {
   // Angka 0 menandakan secara eksplisit DITUTUP (Tombol Keluar Ditekan)
   activeTeachersMap.set(presentationId, 0);
+  
+  // Hapus semua siswa dari memori ketika presentasi ditutup
+  clearPresentationStudents(presentationId);
 }
 
 export function isTeacherActive(presentationId: string): boolean {

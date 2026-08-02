@@ -25,7 +25,7 @@ export async function GET(
   }
 
   // Fetch active students dari RAM jika yang request adalah Guru
-  let activeStudents: string[] = [];
+  let activeStudents: { name: string, isFocused: boolean }[] = [];
   const currentTeacherId = cookies().get("teacherId")?.value;
   const role = request.nextUrl.searchParams.get("role");
   

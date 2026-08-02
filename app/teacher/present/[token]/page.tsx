@@ -15,7 +15,7 @@ export default function PresenterView({ params }: { params: { token: string } })
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [presentation, setPresentation] = useState<any>(null);
-  const [activeStudents, setActiveStudents] = useState<string[]>([]);
+  const [activeStudents, setActiveStudents] = useState<{ name: string, isFocused: boolean }[]>([]);
   const [containerWidth, setContainerWidth] = useState<number>(800);
   const [initialLoaded, setInitialLoaded] = useState(false);
 
@@ -157,16 +157,18 @@ export default function PresenterView({ params }: { params: { token: string } })
         {/* Sidebar: Active Students */}
         <div className="w-full md:w-64 bg-gray-800 md:border-l border-t md:border-t-0 border-gray-700 flex flex-col h-48 md:h-auto shrink-0">
           <div className="p-4 bg-gray-900 border-b border-gray-700">
-            <h2 className="font-bold text-gray-300">Siswa Aktif ({activeStudents.length})</h2>
+            <h2 className="font-bold text-gray-300">Siswa Aktif ({activeStudents.filter(s => s.isFocused).length})</h2>
           </div>
           <div className="flex-1 overflow-auto p-4 space-y-2">
             {activeStudents.length === 0 ? (
               <p className="text-gray-500 text-sm text-center italic mt-4">Belum ada siswa yang bergabung...</p>
             ) : (
               activeStudents.map((student, idx) => (
-                <div key={idx} className="flex items-center space-x-2 bg-gray-700 px-3 py-2 rounded-lg">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-sm font-medium text-gray-200 truncate">{student}</span>
+                <div key={idx} className={`flex items-center space-x-2 bg-gray-700 px-3 py-2 rounded-lg ${student.isFocused ? '' : 'opacity-60'}`}>
+                  <div className={`w-2 h-2 rounded-full ${student.isFocused ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                  <span className={`text-sm font-medium text-gray-200 truncate ${student.isFocused ? '' : 'line-through text-gray-400'}`}>
+                    {student.name}
+                  </span>
                 </div>
               ))
             )}
