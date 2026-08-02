@@ -19,9 +19,12 @@ export default function CreatePresentationForm() {
       return;
     }
 
+    const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    const fileSizeText = fileSizeInMB === "0.00" ? `${(file.size / 1024).toFixed(2)} KB` : `${fileSizeInMB} MB`;
+
     const result = await Swal.fire({
       title: "Buat Presentasi?",
-      html: `Judul: <b>${title}</b><br/>File: <b>${file.name}</b><br/>Pastikan file yang dipilih sudah benar.`,
+      html: `Judul: <b>${title}</b><br/>File: <b>${file.name}</b><br/>Ukuran: <b>${fileSizeText}</b><br/><br/>Pastikan file yang dipilih sudah benar.`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Ya, Buat!",
