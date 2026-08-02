@@ -110,7 +110,7 @@ export async function closePresentationAction(presentationId: string) {
     where: { id: presentationId },
     data: { isActive: false },
   });
-  markTeacherClosed(presentationId);
+  await markTeacherClosed(presentationId);
   redirect("/teacher/dashboard");
 }
 

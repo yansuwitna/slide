@@ -1,63 +1,57 @@
-// File ini berfungsi sebagai memori sementara (RAM) untuk melacak kehadiran siswa
-// tanpa membebani database utama. Sangat cocok untuk skala sekolah (ribuan siswa).
+import prisma from "./db";
 
-// Mendeklarasikan global variable agar tidak kereset saat Next.js re-compile (hot-reload) di tahap development.
-const globalAny: any = global;
+export async function markStudentActive(presentationId: string, deviceId: string, studentName: string) {
+  const existing = await prisma.participant.findFirst({
+    where: { presentationId, deviceId }
+  });
 
-export const activeStudentsMap: Map<string, number> = globalAny.activeStudentsMap || new Map();
-export const activeTeachersMap: Map<string, number> = globalAny.activeTeachersMap || new Map();
-
-if (process.env.NODE_ENV !== "production") {
-  globalAny.activeStudentsMap = activeStudentsMap;
-  globalAny.activeTeachersMap = activeTeachersMap;
+  if (existing) {
+    await prisma.participant.update({
+      where: { id: existing.id },
+      data: { name: studentName, lastSeen: new Date() }
+    });
+  } else {
+    await prisma.participant.create({
+      data: { presentationId, deviceId, name: studentName, lastSeen: new Date() }
+    });
+  }
 }
 
-export function markStudentActive(presentationId: string, studentName: string) {
-  // Simpan waktu terakhir siswa terlihat (timestamp) dengan kunci gabungan presentasi + nama
-  activeStudentsMap.set(`${presentationId}::${studentName}`, Date.now());
-}
+export async function getActiveStudents(presentationId: string, maxAgeMs = 3000): Promise<{ name: string, isFocused: boolean }[]> {
+  const participants = await prisma.participant.findMany({
+    where: { presentationId }
+  });
 
-export function getActiveStudents(presentationId: string, maxAgeMs = 3000): { name: string, isFocused: boolean }[] {
   const now = Date.now();
   const students: { name: string, isFocused: boolean }[] = [];
 
-  activeStudentsMap.forEach((lastSeen, key) => {
-    // Jika data ini milik presentasi yang sedang dicek
-    if (key.startsWith(`${presentationId}::`)) {
-      const isFocused = now - lastSeen <= maxAgeMs;
-      // Jangan hapus dari memori, tetap kembalikan tapi dengan isFocused = false
-      students.push({
-        name: key.split('::')[1],
-        isFocused,
-      });
-    }
-  });
+  for (const p of participants) {
+    const isFocused = now - p.lastSeen.getTime() <= maxAgeMs;
+    // Tampilkan jika pernah join (bisa diatur jika ingin menyembunyikan yg tidak aktif lama)
+    // Untuk saat ini kita tampilkan semua, isFocused akan menentukan status online
+    students.push({
+      name: p.name,
+      isFocused
+    });
+  }
 
   return students;
 }
 
-export function clearPresentationStudents(presentationId: string) {
-  activeStudentsMap.forEach((_, key) => {
-    if (key.startsWith(`${presentationId}::`)) {
-      activeStudentsMap.delete(key);
-    }
+export async function markTeacherActive(presentationId: string) {
+  // Hanya memperbarui timestamp di level presentasi jika diperlukan, 
+  // namun umumnya isActive di presentation sudah cukup.
+}
+
+export async function markTeacherClosed(presentationId: string) {
+  // Siswa akan otomatis dihapus jika menggunakan onDelete: Cascade (jika presentation dihapus),
+  // atau biarkan saja data partisipan tersimpan sebagai riwayat.
+}
+
+export async function isTeacherActive(presentationId: string): Promise<boolean> {
+  const pres = await prisma.presentation.findUnique({
+    where: { id: presentationId },
+    select: { isActive: true }
   });
-}
-
-export function markTeacherActive(presentationId: string) {
-  // Angka 1 menandakan secara eksplisit DIBUKA
-  activeTeachersMap.set(presentationId, 1);
-}
-
-export function markTeacherClosed(presentationId: string) {
-  // Angka 0 menandakan secara eksplisit DITUTUP (Tombol Keluar Ditekan)
-  activeTeachersMap.set(presentationId, 0);
-  
-  // Hapus semua siswa dari memori ketika presentasi ditutup
-  clearPresentationStudents(presentationId);
-}
-
-export function isTeacherActive(presentationId: string): boolean {
-  // Selama belum ada perintah DITUTUP (0), maka selalu dianggap AKTIF (termasuk jika server baru nyala)
-  return activeTeachersMap.get(presentationId) !== 0;
+  return pres?.isActive ?? false;
 }

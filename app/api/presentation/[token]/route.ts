@@ -18,32 +18,30 @@ export async function GET(
 
   // Update kehadiran siswa ke RAM HANYA JIKA mereka sedang fokus di layar
   const studentName = cookies().get("studentName")?.value;
+  const deviceId = cookies().get("deviceId")?.value;
   const isFocused = request.nextUrl.searchParams.get("focused") === "true";
   
-  if (studentName && isFocused) {
-    markStudentActive(presentation.id, studentName);
+  if (studentName && deviceId && isFocused) {
+    await markStudentActive(presentation.id, deviceId, studentName);
   }
 
-  // Fetch active students dari RAM jika yang request adalah Guru
+  // Fetch active students dari database jika yang request adalah Guru
   let activeStudents: { name: string, isFocused: boolean }[] = [];
   const currentTeacherId = cookies().get("teacherId")?.value;
   const role = request.nextUrl.searchParams.get("role");
   
   if (role === "teacher" && currentTeacherId === presentation.teacherId) {
-    // Guru sedang meminta data -> Tandai guru aktif
-    markTeacherActive(presentation.id);
+    await markTeacherActive(presentation.id);
     
     // 2000ms = 2 detik toleransi (super ketat)
-    activeStudents = getActiveStudents(presentation.id, 2000);
+    activeStudents = await getActiveStudents(presentation.id, 2000);
   } else {
     // Siswa sedang meminta data -> Cek apakah guru sudah menekan Keluar (Tutup)
-    // Cek dulu dari Database (paling kuat karena sync lintas proses VPS PM2)
     if (presentation.isActive === false) {
       return NextResponse.json({ error: "Teacher offline", closed: true });
     }
     
-    // Jika di database masih aktif, cek fallback dari RAM (opsional, tapi baik untuk menjaga redundansi)
-    const teacherOnline = isTeacherActive(presentation.id);
+    const teacherOnline = await isTeacherActive(presentation.id);
     if (!teacherOnline) {
       return NextResponse.json({ error: "Teacher offline", closed: true });
     }
