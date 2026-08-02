@@ -19,6 +19,26 @@ export default async function Home() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Siswa Card */}
+          <div className="bg-white bg-opacity-70 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 flex flex-col">
+            <div className="text-5xl mb-4">👨‍🎓</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Saya Siswa
+            </h2>
+            <p className="text-gray-600 mb-6 text-sm">
+              Bergabung ke kelas presentasi tanpa perlu mendaftar. Cukup masukkan
+              nama dan token dari guru.
+            </p>
+            <div className="flex flex-col space-y-3 mt-auto">
+              <Link
+                href="/student/join"
+                className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 h-full flex items-center justify-center"
+              >
+                Gabung Kelas
+              </Link>
+            </div>
+          </div>
+
           {/* Guru Card */}
           <div className="bg-white bg-opacity-70 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:-translate-y-1">
             <div className="text-5xl mb-4">👨‍🏫</div>
@@ -39,26 +59,6 @@ export default async function Home() {
                 className="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-3 px-6 rounded-lg transition duration-200"
               >
                 Daftar
-              </Link>
-            </div>
-          </div>
-
-          {/* Siswa Card */}
-          <div className="bg-white bg-opacity-70 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 flex flex-col">
-            <div className="text-5xl mb-4">👨‍🎓</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              Saya Siswa
-            </h2>
-            <p className="text-gray-600 mb-6 text-sm">
-              Bergabung ke kelas presentasi tanpa perlu mendaftar. Cukup masukkan
-              nama dan token dari guru.
-            </p>
-            <div className="flex flex-col space-y-3 mt-auto">
-              <Link
-                href="/student/join"
-                className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 h-full flex items-center justify-center"
-              >
-                Gabung Kelas
               </Link>
             </div>
           </div>
