@@ -3,6 +3,8 @@ import prisma from "@/lib/db";
 import { cookies } from "next/headers";
 import { markStudentActive, getActiveStudents, markTeacherActive, isTeacherActive } from "@/lib/presence";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { token: string } }
@@ -22,7 +24,11 @@ export async function GET(
   const isFocused = request.nextUrl.searchParams.get("focused") === "true";
   
   if (studentName && deviceId && isFocused) {
-    await markStudentActive(presentation.id, deviceId, studentName);
+    try {
+      await markStudentActive(presentation.id, deviceId, studentName);
+    } catch (error) {
+      console.error("Error marking student active:", error);
+    }
   }
 
   // Fetch active students dari database jika yang request adalah Guru
@@ -31,10 +37,13 @@ export async function GET(
   const role = request.nextUrl.searchParams.get("role");
   
   if (role === "teacher" && currentTeacherId === presentation.teacherId) {
-    await markTeacherActive(presentation.id);
-    
-    // 15000ms = 15 detik toleransi untuk mengurangi beban database
-    activeStudents = await getActiveStudents(presentation.id, 15000);
+    try {
+      await markTeacherActive(presentation.id);
+      // 15000ms = 15 detik toleransi untuk mengurangi beban database
+      activeStudents = await getActiveStudents(presentation.id, 15000);
+    } catch (e) {
+      console.error("Error fetching from Redis:", e);
+    }
   } else {
     // Siswa sedang meminta data -> Cek apakah guru sudah menekan Keluar (Tutup)
     if (presentation.isActive === false) {
