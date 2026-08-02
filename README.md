@@ -11,150 +11,97 @@ EduPresent adalah sebuah platform web presentasi interaktif dan *real-time* yang
 
 ---
 
-## 🚀 Panduan Instalasi (Development Lokal)
+## 🌍 PANDUAN DEPLOYMENT VPS (Zero to Hero)
 
-Jika Anda ingin menjalankan aplikasi ini di komputer lokal Anda:
+Banyak hal yang bisa menyebabkan *error* saat pertama kali melakukan deployment ke VPS (seperti fitur *upload* gagal atau tombol *logout/delete* mendapatkan error `403 Forbidden`). 
 
-1. **Clone & Install Dependencies**
+Ikuti **langkah-langkah berurutan** di bawah ini untuk memastikan aplikasi Anda berjalan sempurna di VPS (terutama yang menggunakan Nginx sebagai Reverse Proxy).
+
+### Langkah 1: Persiapan Nginx (Sangat Penting untuk PDF)
+Secara bawaan, Nginx menolak *file* yang diunggah jika ukurannya melebihi 1MB. Kita harus memperbesarnya agar Guru bisa mengunggah PDF.
+1. Buka konfigurasi Nginx Anda di VPS:
    ```bash
-   git clone <repo-url>
-   cd presentasi
-   npm install
+   sudo nano /etc/nginx/nginx.conf
+   # atau sudo nano /etc/nginx/sites-available/default
+   ```
+2. Tambahkan atau ubah baris berikut di dalam blok `http { ... }` atau `server { ... }`:
+   ```nginx
+   client_max_body_size 50M;
+   ```
+3. Simpan dan *restart* Nginx:
+   ```bash
+   sudo systemctl restart nginx
    ```
 
-2. **Siapkan Database SQLite**
-   Karena aplikasi ini menggunakan Prisma + SQLite, Anda wajib me-sinkronisasi strukturnya terlebih dahulu.
+### Langkah 2: Unduh Kode & Konfigurasi Keamanan (CSRF)
+Fitur *Server Actions* Next.js 14 akan memblokir aksi (seperti klik tombol Hapus/Logout/Buat) jika domain tidak dikenali, menghasilkan error `403 Forbidden`.
+1. *Clone* atau *Pull* (*tarik*) kode terbaru ke VPS Anda.
    ```bash
-   npx prisma db push
+   cd /lokasi/folder/presentasi
+   git pull
+   ```
+2. Buka file `next.config.mjs` dan pastikan domain VPS Anda tertulis di `allowedOrigins`. Contoh:
+   ```javascript
+   /** @type {import('next').NextConfig} */
+   const nextConfig = {
+     experimental: {
+       serverActions: {
+         bodySizeLimit: '50mb',
+         allowedOrigins: ['slide.smkn1abang.sch.id', 'www.slide.smkn1abang.sch.id'], // GANTI DENGAN DOMAIN ANDA
+       },
+     },
+   };
+   export default nextConfig;
    ```
 
-3. **Jalankan Aplikasi**
-   ```bash
-   npm run dev
-   ```
-   Aplikasi akan berjalan di `http://localhost:3000`.
-
----
-
-## 🌍 Panduan Deployment / Hosting (menggunakan PM2)
-
-Jika Anda ingin meng-hosting aplikasi ini di VPS (Virtual Private Server) agar bisa diakses seluruh sekolah secara 24 jam penuh tanpa terputus, Anda sangat disarankan menggunakan **PM2** (Process Manager).
-
-### Prasyarat di Server:
-- Node.js (versi 18+)
-- NPM
-- PM2 terinstal secara global (`npm install -g pm2`)
-
-### Langkah-Langkah Menjalankan EduPresent di PM2:
-
-**1. Masuk ke direktori proyek Anda**
+### Langkah 3: Hak Akses Folder Upload
+Aplikasi butuh hak untuk menulis (*write*) ke dalam sistem agar bisa menyimpan file PDF.
 ```bash
-cd /lokasi/folder/presentasi
+# Pastikan Anda berada di direktori proyek presentasi
+mkdir -p public/uploads
+chmod -R 775 public/uploads
 ```
 
-**2. Install seluruh package (jika belum)**
+### Langkah 4: Instalasi & Database
 ```bash
+# Install paket Node.js
 npm install
-```
 
-**3. Buat dan siapkan Database Production**
-```bash
+# Buat kerangka database
 npx prisma generate
 npx prisma db push
 ```
 
-**4. Build Aplikasi Next.js**
-(Ini wajib dilakukan sebelum menjalankan Next.js di mode *Production*).
+### Langkah 5: Build Aplikasi
+**Perhatian:** Langkah ini WAJIB dilakukan setelah Anda mengedit file `next.config.mjs`. Jika Anda belum menjalankan perintah ini, konfigurasi keamanan domain di atas tidak akan aktif!
 ```bash
 npm run build
 ```
 
-**5. Jalankan Aplikasi dengan PM2**
-Cara terbaik menjalankan aplikasi di *background* adalah menggunakan file konfigurasi PM2:
+### Langkah 6: Jalankan dengan PM2
+PM2 akan memastikan aplikasi Anda hidup 24 jam nonstop.
 ```bash
+# Mulai aplikasi menggunakan PM2 (port default 3000)
 pm2 start ecosystem.config.js
+
+# ATAU, jika Anda ingin menggunakan Custom Port (contoh port 4000)
+pm2 start npm --name "edupresent" -- start -- -p 4000
 ```
-*(Pastikan Anda telah membuat file `ecosystem.config.js` di folder proyek Anda)*
-
-**Alternatif: Menjalankan PM2 Langsung dengan Custom Port**
-Jika Anda tidak ingin membuat file konfigurasi, Anda bisa menyisipkan port langsung saat menjalankan PM2.
-
-Menggunakan Environment Variable `PORT` (Biasa di Linux/Mac):
+Untuk membuat aplikasi ini otomatis menyala ketika VPS mati/direstart:
 ```bash
-PORT=3001 pm2 start npm --name "aplikasi-ku" -- start
+pm2 save
+pm2 startup
 ```
-
-Atau meneruskan argumen port (`-p`) ke script Next.js:
-```bash
-pm2 start npm --name "aplikasi-ku" -- start -- -p 3001
-```
-
-*(Catatan: Jika Anda menggunakan server file kustom seperti `app.js`, perintahnya adalah `PORT=3001 pm2 start app.js --name "aplikasi-ku"` atau `pm2 start app.js --name "aplikasi-ku" -- --port 3001`)*
 
 ---
 
-## ⚙️ Menjalankan Tanpa PM2 dengan Custom Port
+## 🚀 Panduan Instalasi (Development Lokal)
 
-Jika Anda tidak ingin menggunakan PM2 dan ingin menentukan port sesuai keinginan secara manual (contoh: port `4000`), Anda dapat menggunakan perintah berikut:
-
-```bash
-npm run start -- -p 4000
-```
-Atau menggunakan `npx`:
-```bash
-npx next start -p 4000
-```
-*(Catatan: Pastikan Anda sudah menjalankan `npm run build` sebelum menggunakan perintah di atas)*
-
-### 💡 Perintah Berguna PM2 Lainnya:
-
-- **Melihat status aplikasi:**
-  ```bash
-  pm2 status
-  ```
-- **Melihat log (jika ada error):**
-  ```bash
-  pm2 logs edupresent
-  ```
-- **Me-restart aplikasi (Misal setelah ada update):**
-  ```bash
-  pm2 restart edupresent
-  ```
-- **Mematikan aplikasi:**
-  ```bash
-  pm2 stop edupresent
-  ```
-- **Menyimpan daftar PM2 agar otomatis menyala (auto-start) ketika VPS di-restart:**
-  ```bash
-  pm2 save
-  pm2 startup
-  ```
-
----
-
-## 🛠️ Troubleshooting VPS (Gagal Upload Presentasi)
-
-Jika Anda mengalami kendala **tidak bisa membuat presentasi** (file PDF gagal di-upload) setelah di-deploy ke VPS, periksa 3 hal berikut:
-
-### 1. Batas Upload Next.js (Sudah Diperbaiki)
-Secara default, Next.js membatasi upload hingga 1MB. Namun, ini sudah diatasi dengan penambahan konfigurasi di `next.config.mjs` (`bodySizeLimit: '50mb'`).
-👉 **Solusi:** Pastikan Anda sudah menarik pembaruan kode ini ke VPS, lalu jalankan `npm run build` dan `pm2 restart edupresent` (atau sesuai nama PM2 Anda).
-
-### 2. Batas Upload NGINX
-Jika VPS Anda menggunakan Nginx sebagai *Reverse Proxy*, Nginx akan memblokir file lebih dari 1MB (Error `413 Request Entity Too Large`).
-👉 **Solusi:** Buka konfigurasi Nginx Anda (`/etc/nginx/sites-available/default` atau `/etc/nginx/nginx.conf`) dan tambahkan baris ini di dalam blok `server` atau `http`:
-```nginx
-client_max_body_size 50M;
-```
-Lalu restart Nginx: `sudo systemctl restart nginx`
-
-### 3. Izin Akses Folder (Permissions)
-Aplikasi butuh akses untuk membuat file di dalam folder `public/uploads`.
-👉 **Solusi:** Jalankan perintah berikut di folder proyek Anda di VPS:
-```bash
-mkdir -p public/uploads
-chmod -R 775 public/uploads
-```
+Jika Anda ingin menjalankan aplikasi ini di komputer lokal Anda untuk modifikasi kode:
+1. `git clone <repo-url>` lalu `cd presentasi`
+2. `npm install`
+3. `npx prisma db push`
+4. `npm run dev`
 
 ---
 
@@ -164,4 +111,4 @@ chmod -R 775 public/uploads
   - Password: `1`
 - Akun Guru dapat didaftarkan secara bebas melalui halaman `/teacher/register`.
 
-> **Catatan Server/VPS:** File presentasi (PDF) yang diupload disimpan di dalam folder `public/uploads/`. Pastikan folder ini aman dan tidak terhapus saat Anda melakukan *redeployment*.
+> **Catatan Server:** File presentasi (PDF) yang diupload disimpan di dalam folder `public/uploads/`. Pastikan folder ini aman dan jangan sampai terhapus saat Anda melakukan *redeployment* (memperbarui kode dari git).
