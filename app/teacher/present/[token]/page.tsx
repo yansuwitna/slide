@@ -156,8 +156,9 @@ export default function PresenterView({ params }: { params: { token: string } })
 
         {/* Sidebar: Active Students */}
         <div className="w-full md:w-64 bg-gray-800 md:border-l border-t md:border-t-0 border-gray-700 flex flex-col h-48 md:h-auto shrink-0">
-          <div className="p-4 bg-gray-900 border-b border-gray-700">
+          <div className="p-4 bg-gray-900 border-b border-gray-700 flex justify-between items-center">
             <h2 className="font-bold text-gray-300">Siswa Aktif ({activeStudents.filter(s => s.isFocused).length})</h2>
+            <div title={presentation.redisOk ? "Redis Terhubung (Realtime Lancar)" : "Redis Terputus (Realtime Lambat)"} className={`w-3 h-3 rounded-full ${presentation.redisOk ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`}></div>
           </div>
           <div className="flex-1 overflow-auto p-4 space-y-2">
             {activeStudents.length === 0 ? (

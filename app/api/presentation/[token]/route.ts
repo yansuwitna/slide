@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { cookies } from "next/headers";
 import { markStudentActive, getActiveStudents, markTeacherActive, isTeacherActive } from "@/lib/presence";
+import { checkRedisStatus } from "@/lib/redis";
 
 export const dynamic = 'force-dynamic';
 
@@ -47,12 +48,15 @@ export async function GET(
   } else {
     // Siswa sedang meminta data -> Cek apakah guru sudah menekan Keluar (Tutup)
     if (presentation.isActive === false) {
+      console.log(`Student kicked out from ${params.token} because presentation.isActive is false in DB!`);
       return NextResponse.json({ error: "Teacher offline", closed: true });
     }
   }
 
+  const redisOk = await checkRedisStatus();
+
   // Modifikasi path agar selalu menggunakan API route khusus (mencegah cache 'Content unavailable' pada VPS)
-  const modifiedPresentation = { ...presentation, activeStudents };
+  const modifiedPresentation = { ...presentation, activeStudents, redisOk };
   if (modifiedPresentation.filePath?.startsWith('/uploads/')) {
     modifiedPresentation.filePath = modifiedPresentation.filePath.replace('/uploads/', '/api/uploads/');
   }
