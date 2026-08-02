@@ -13,17 +13,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 export default function StudentView({ params }: { params: { token: string } }) {
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [presentation, setPresentation] = useState<any>(null);
-  const [containerWidth, setContainerWidth] = useState<number>(800);
-
-  useEffect(() => {
-    const updateWidth = () => {
-      const width = window.innerWidth;
-      setContainerWidth(width > 850 ? 800 : width - 40);
-    };
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, []);
 
   useEffect(() => {
     // Initial fetch
@@ -67,12 +56,12 @@ export default function StudentView({ params }: { params: { token: string } }) {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Main Content */}
       <div className="flex-1 flex justify-center items-center p-4 overflow-auto">
-        <div className="bg-white p-2 rounded-lg shadow-xl max-w-full pointer-events-none">
+        <div className="bg-white p-2 rounded-lg shadow-xl max-w-full">
           <Document
             file={presentation.filePath}
             className="flex justify-center"
           >
-            <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} width={containerWidth} className="max-w-full" />
+            <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} width={800} className="max-w-full" />
           </Document>
         </div>
       </div>

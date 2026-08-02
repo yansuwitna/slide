@@ -16,20 +16,7 @@ export default function PresenterView({ params }: { params: { token: string } })
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [presentation, setPresentation] = useState<any>(null);
   const [activeStudents, setActiveStudents] = useState<{ name: string, isFocused: boolean }[]>([]);
-  const [containerWidth, setContainerWidth] = useState<number>(800);
   const [initialLoaded, setInitialLoaded] = useState(false);
-
-  useEffect(() => {
-    const updateWidth = () => {
-      const width = window.innerWidth;
-      // Kurangi lebar sidebar (256px) di layar desktop (md: >= 768px), plus padding
-      const availableWidth = width >= 768 ? width - 256 - 64 : width - 40; 
-      setContainerWidth(availableWidth > 800 ? 800 : availableWidth);
-    };
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, []);
 
   useEffect(() => {
     const fetchPres = () => {
@@ -149,7 +136,7 @@ export default function PresenterView({ params }: { params: { token: string } })
               onLoadSuccess={({ numPages }) => setNumPages(numPages)}
               className="flex justify-center"
             >
-              <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} width={containerWidth} className="max-w-full" />
+              <Page pageNumber={pageNumber} renderTextLayer={false} renderAnnotationLayer={false} width={800} className="max-w-full" />
             </Document>
           </div>
         </div>

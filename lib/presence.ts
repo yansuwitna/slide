@@ -51,6 +51,14 @@ export async function getActiveStudents(presentationId: string, maxAgeMs = 15000
   for (const [deviceId, dataStr] of Object.entries(allStudents)) {
     try {
       const data = JSON.parse(dataStr as string);
+      
+      // Jika sudah lebih dari 1 jam tidak ada kabar sama sekali, anggap sudah keluar (jangan ditampilkan)
+      if (now - data.lastSeen > 3600000) {
+        // Optional: Bersihkan dari Redis sekalian
+        redis.hdel(redisKey, deviceId).catch(() => {});
+        continue;
+      }
+
       const isFocused = now - data.lastSeen <= maxAgeMs;
       students.push({
         name: data.name,

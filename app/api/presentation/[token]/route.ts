@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { cookies } from "next/headers";
-import { markStudentActive, getActiveStudents, markTeacherActive, isTeacherActive } from "@/lib/presence";
+import { markStudentActive, getActiveStudents, markTeacherActive, isTeacherActive, markTeacherClosed } from "@/lib/presence";
 import { checkRedisStatus } from "@/lib/redis";
 
 export const dynamic = 'force-dynamic';
@@ -42,6 +42,9 @@ export async function GET(
       // Jika presentasi sebelumnya sudah ditutup (isActive = false), tapi guru membukanya lagi dari riwayat
       // maka otomatis kita aktifkan kembali agar siswa bisa masuk.
       if (!presentation.isActive) {
+        // Hapus cache siswa lama di Redis agar daftar siswa kembali kosong
+        await markTeacherClosed(presentation.id);
+        
         await prisma.presentation.update({
           where: { id: presentation.id },
           data: { isActive: true }
