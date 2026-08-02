@@ -43,5 +43,11 @@ export async function GET(
     }
   }
 
-  return NextResponse.json({ ...presentation, activeStudents });
+  // Modifikasi path agar selalu menggunakan API route khusus (mencegah cache 'Content unavailable' pada VPS)
+  const modifiedPresentation = { ...presentation, activeStudents };
+  if (modifiedPresentation.filePath?.startsWith('/uploads/')) {
+    modifiedPresentation.filePath = modifiedPresentation.filePath.replace('/uploads/', '/api/uploads/');
+  }
+
+  return NextResponse.json(modifiedPresentation);
 }
