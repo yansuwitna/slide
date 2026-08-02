@@ -6,6 +6,7 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import { updatePage, closePresentationAction } from "@/app/actions";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 // Use CDN for pdf worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -21,7 +22,9 @@ export default function PresenterView({ params }: { params: { token: string } })
   useEffect(() => {
     const updateWidth = () => {
       const width = window.innerWidth;
-      setContainerWidth(width > 850 ? 800 : width - 40);
+      // Kurangi lebar sidebar (256px) di layar desktop (md: >= 768px), plus padding
+      const availableWidth = width >= 768 ? width - 256 - 64 : width - 40; 
+      setContainerWidth(availableWidth > 800 ? 800 : availableWidth);
     };
     updateWidth();
     window.addEventListener("resize", updateWidth);
@@ -72,6 +75,23 @@ export default function PresenterView({ params }: { params: { token: string } })
     }
   };
 
+  const handleExit = () => {
+    Swal.fire({
+      title: 'Akhiri Presentasi?',
+      text: "Siswa akan dikeluarkan dari halaman presentasi secara otomatis.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Akhiri',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        closePresentationAction(presentation.id);
+      }
+    });
+  };
+
   if (!presentation) return <div className="text-center p-10 font-bold text-xl">Memuat...</div>;
 
   return (
@@ -112,7 +132,7 @@ export default function PresenterView({ params }: { params: { token: string } })
         </div>
         
         <button
-          onClick={() => closePresentationAction(presentation.id)}
+          onClick={handleExit}
           className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-bold transition"
         >
           Keluar

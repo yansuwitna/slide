@@ -105,3 +105,8 @@ export async function joinPresentation(formData: FormData) {
   cookies().set("studentName", name);
   redirect(`/student/view/${token}`);
 }
+
+export async function logoutStudentAction() {
+  cookies().delete("studentName");
+  redirect("/");
+}

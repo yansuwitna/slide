@@ -6,6 +6,7 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { logoutStudentAction } from "@/app/actions";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -39,9 +40,10 @@ export default function StudentView({ params }: { params: { token: string } }) {
               icon: 'info',
               title: 'Presentasi Selesai',
               text: 'Guru telah menutup presentasi ini.',
-              confirmButtonColor: '#3085d6',
+              timer: 2000,
+              showConfirmButton: false,
             }).then(() => {
-              window.location.href = "/";
+              logoutStudentAction();
             });
             return;
           }
@@ -70,10 +72,6 @@ export default function StudentView({ params }: { params: { token: string } }) {
         <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-bold">
           Halaman {pageNumber}
         </div>
-
-        <Link href="/" className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-bold transition">
-          Keluar
-        </Link>
       </div>
 
       {/* Main Content */}

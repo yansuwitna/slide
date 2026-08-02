@@ -1,10 +1,10 @@
 import prisma from "@/lib/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createPresentationAction } from "./actions";
 import Link from "next/link";
-import { logoutTeacher } from "@/app/actions";
+import LogoutButton from "./LogoutButton";
 import DeleteButton from "./DeleteButton";
+import CreatePresentationForm from "./CreatePresentationForm";
 
 export default async function Dashboard() {
   const teacherId = cookies().get("teacherId")?.value;
@@ -27,47 +27,14 @@ export default async function Dashboard() {
         <h1 className="text-3xl font-bold text-gray-800">
           Halo, Guru {user.name || user.username}!
         </h1>
-        <form action={logoutTeacher}>
-          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-bold">
-            Logout
-          </button>
-        </form>
+        <LogoutButton />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Buat Presentasi */}
         <div className="bg-white p-8 rounded-2xl shadow-xl lg:col-span-1 h-fit">
           <h2 className="text-2xl font-bold mb-6">Mulai Presentasi Baru</h2>
-          <form action={createPresentationAction} className="space-y-4">
-            <div>
-              <label className="block text-gray-700 font-bold mb-2">Judul</label>
-              <input
-                name="title"
-                required
-                className="w-full border p-3 rounded-lg bg-gray-50"
-                placeholder="Contoh: Biologi Bab 1"
-              />
-            </div>
-            <input type="hidden" name="type" value="pdf" />
-
-            <div>
-              <label className="block text-gray-700 font-bold mb-2">Upload File PDF</label>
-              <input
-                name="file"
-                type="file"
-                accept=".pdf"
-                required
-                className="w-full border p-3 rounded-lg bg-gray-50 mb-2"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg"
-            >
-              Buat Presentasi
-            </button>
-          </form>
+          <CreatePresentationForm />
         </div>
 
         {/* Daftar Presentasi Aktif */}
