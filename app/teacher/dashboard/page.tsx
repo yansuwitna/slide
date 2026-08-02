@@ -5,6 +5,7 @@ import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 import DeleteButton from "./DeleteButton";
 import CreatePresentationForm from "./CreatePresentationForm";
+import { checkRedisStatus } from "@/lib/redis";
 
 export default async function Dashboard() {
   const teacherId = cookies().get("teacherId")?.value;
@@ -21,12 +22,28 @@ export default async function Dashboard() {
 
   if (!user) redirect("/teacher/login");
 
+  const redisOk = await checkRedisStatus();
+
   return (
     <div className="min-h-screen p-8 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-10 bg-white/50 backdrop-blur p-4 rounded-xl shadow">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Halo, Guru {user.name || user.username}!
-        </h1>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Halo, Guru {user.name || user.username}!
+          </h1>
+          <div className="flex items-center space-x-2 mt-2">
+            <span className="text-sm text-gray-600 font-medium">Status Server Realtime:</span>
+            {redisOk ? (
+              <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div> NORMAL
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold flex items-center animate-pulse">
+                <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div> TERPUTUS
+              </span>
+            )}
+          </div>
+        </div>
         <LogoutButton />
       </div>
 

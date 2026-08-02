@@ -47,10 +47,13 @@ export async function GET(
     }
   } else {
     // Siswa sedang meminta data -> Cek apakah guru sudah menekan Keluar (Tutup)
+    // SEMENTARA SAYA MATIKAN PENGECEKAN INI UNTUK MEMBUKTIKAN APAKAH SERVER MENJALANKAN KODE BARU ATAU LAMA
+    /*
     if (presentation.isActive === false) {
       console.log(`Student kicked out from ${params.token} because presentation.isActive is false in DB!`);
       return NextResponse.json({ error: "Teacher offline", closed: true });
     }
+    */
   }
 
   const redisOk = await checkRedisStatus();
