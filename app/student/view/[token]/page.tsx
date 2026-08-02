@@ -65,14 +65,6 @@ export default function StudentView({ params }: { params: { token: string } }) {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <div className="bg-white shadow-sm p-4 flex justify-between items-center">
-        <h1 className="font-bold text-gray-800">{presentation.title || "EduPresent"}</h1>
-        <div className="flex items-center space-x-2">
-          <span className="text-xs text-gray-500">Status Sistem:</span>
-          <div title={presentation.redisOk ? "Realtime Lancar" : "Koneksi Realtime Terganggu"} className={`w-3 h-3 rounded-full ${presentation.redisOk ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`}></div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 flex justify-center items-center p-4 overflow-auto">
         <div className="bg-white p-2 rounded-lg shadow-xl max-w-full pointer-events-none">
