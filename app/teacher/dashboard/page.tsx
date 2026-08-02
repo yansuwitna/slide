@@ -68,6 +68,15 @@ export default async function Dashboard() {
                     <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">
                       Token: {pres.token}
                     </span>
+                    {pres.isActive ? (
+                      <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded animate-pulse">
+                        Berjalan
+                      </span>
+                    ) : (
+                      <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">
+                        Selesai
+                      </span>
+                    )}
                   </div>
                   <div className="flex space-x-2 mt-2">
                     <Link
