@@ -50,7 +50,7 @@ export async function getActiveStudents(presentationId: string, maxAgeMs = 15000
 
   for (const [deviceId, dataStr] of Object.entries(allStudents)) {
     try {
-      const data = JSON.parse(dataStr);
+      const data = JSON.parse(dataStr as string);
       const isFocused = now - data.lastSeen <= maxAgeMs;
       students.push({
         name: data.name,
