@@ -40,8 +40,11 @@ export async function GET(
   if (role === "teacher" && currentTeacherId === presentation.teacherId) {
     try {
       await markTeacherActive(presentation.id);
-      // 2000ms = 2 detik toleransi (sangat cepat mendeteksi siswa tidak aktif/pindah tab)
-      activeStudents = await getActiveStudents(presentation.id, 2000);
+      
+      const timeoutSetting = await prisma.setting.findUnique({ where: { key: "presenceTimeout" } });
+      const timeoutValue = timeoutSetting?.value ? parseInt(timeoutSetting.value) : 2000;
+      
+      activeStudents = await getActiveStudents(presentation.id, timeoutValue);
     } catch (e) {
       console.error("Error fetching from Redis:", e);
     }

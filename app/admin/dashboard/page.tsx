@@ -26,9 +26,11 @@ export default async function AdminDashboard() {
 
   const appNameSetting = await prisma.setting.findUnique({ where: { key: "appName" } });
   const appDescSetting = await prisma.setting.findUnique({ where: { key: "appDesc" } });
+  const presenceTimeoutSetting = await prisma.setting.findUnique({ where: { key: "presenceTimeout" } });
 
   const currentAppName = appNameSetting?.value || "EduPresent";
   const currentAppDesc = appDescSetting?.value || "Platform Presentasi Interaktif untuk Guru dan Siswa";
+  const currentTimeout = presenceTimeoutSetting?.value || "2000";
 
   return (
     <div className="min-h-screen p-8 max-w-6xl mx-auto">
@@ -58,8 +60,8 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="bg-white p-8 rounded-2xl shadow-xl mb-8 border-t-4 border-blue-500">
-        <h2 className="text-2xl font-bold mb-6 text-blue-800">Pengaturan Teks Beranda</h2>
-        <SettingsForm initialName={currentAppName} initialDesc={currentAppDesc} />
+        <h2 className="text-2xl font-bold mb-6 text-blue-800">Pengaturan Aplikasi</h2>
+        <SettingsForm initialName={currentAppName} initialDesc={currentAppDesc} initialTimeout={currentTimeout} />
       </div>
 
       <div className="bg-white p-8 rounded-2xl shadow-xl">

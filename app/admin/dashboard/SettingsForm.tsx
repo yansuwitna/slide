@@ -4,7 +4,7 @@ import { useState } from "react";
 import { saveSettingsAction } from "./actions";
 import Swal from "sweetalert2";
 
-export default function SettingsForm({ initialName, initialDesc }: { initialName: string, initialDesc: string }) {
+export default function SettingsForm({ initialName, initialDesc, initialTimeout }: { initialName: string, initialDesc: string, initialTimeout: string }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -51,6 +51,19 @@ export default function SettingsForm({ initialName, initialDesc }: { initialName
           className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+      </div>
+      <div>
+        <label className="block text-gray-700 font-bold mb-2">Waktu Toleransi Siswa Tidak Aktif (Mili-detik)</label>
+        <input 
+          type="number" 
+          name="presenceTimeout" 
+          defaultValue={initialTimeout} 
+          min="1000"
+          step="500"
+          className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+        <p className="text-sm text-gray-500 mt-1">Standar: 2000 (Artinya 2 detik. Jika lebih dari 2 detik siswa tidak klik layar presentasi/pindah tab, akan dianggap tidak aktif).</p>
       </div>
       <button 
         type="submit" 

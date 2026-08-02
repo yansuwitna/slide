@@ -70,6 +70,7 @@ export async function saveSettingsAction(formData: FormData) {
 
   const appName = formData.get("appName") as string;
   const appDesc = formData.get("appDesc") as string;
+  const presenceTimeout = formData.get("presenceTimeout") as string;
 
   if (appName) {
     await prisma.setting.upsert({
@@ -84,6 +85,14 @@ export async function saveSettingsAction(formData: FormData) {
       where: { key: "appDesc" },
       update: { value: appDesc },
       create: { key: "appDesc", value: appDesc },
+    });
+  }
+
+  if (presenceTimeout) {
+    await prisma.setting.upsert({
+      where: { key: "presenceTimeout" },
+      update: { value: presenceTimeout },
+      create: { key: "presenceTimeout", value: presenceTimeout },
     });
   }
 
