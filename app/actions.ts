@@ -63,6 +63,14 @@ export async function loginTeacher(formData: FormData) {
 }
 
 export async function logoutTeacher() {
+  const teacherId = cookies().get("teacherId")?.value;
+  if (teacherId) {
+    await prisma.presentation.updateMany({
+      where: { teacherId, isActive: true },
+      data: { isActive: false }
+    });
+  }
+  
   cookies().delete("teacherId");
   cookies().delete("adminId");
   redirect("/");
@@ -83,6 +91,7 @@ export async function createPresentation(title: string, type: string, filePath: 
       filePath,
       token,
       teacherId,
+      isActive: true,
     },
   });
 
@@ -97,6 +106,10 @@ export async function updatePage(token: string, page: number) {
 }
 
 export async function closePresentationAction(presentationId: string) {
+  await prisma.presentation.update({
+    where: { id: presentationId },
+    data: { isActive: false },
+  });
   markTeacherClosed(presentationId);
   redirect("/teacher/dashboard");
 }

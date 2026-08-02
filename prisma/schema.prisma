@@ -24,6 +24,7 @@ model Presentation {
   type         String        // 'pdf' or 'drive'
   filePath     String
   currentPage  Int           @default(1)
+  isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
   participants Participant[]
 }

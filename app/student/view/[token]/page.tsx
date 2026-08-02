@@ -65,14 +65,7 @@ export default function StudentView({ params }: { params: { token: string } }) {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Header */}
-      <div className="bg-white p-4 flex flex-col md:flex-row justify-between items-center shadow-md gap-4">
-        <h1 className="text-xl font-bold text-gray-800 text-center md:text-left">{presentation.title}</h1>
-        
-        <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-bold">
-          Halaman {pageNumber}
-        </div>
-      </div>
+
 
       {/* Main Content */}
       <div className="flex-1 flex justify-center items-center p-4 overflow-auto">

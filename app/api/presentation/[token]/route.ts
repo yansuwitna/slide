@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const presentation = await prisma.presentation.findUnique({
     where: { token: params.token },
-    select: { id: true, teacherId: true, currentPage: true, type: true, filePath: true, title: true },
+    select: { id: true, teacherId: true, currentPage: true, type: true, filePath: true, title: true, isActive: true },
   });
 
   if (!presentation) {
@@ -37,6 +37,12 @@ export async function GET(
     activeStudents = getActiveStudents(presentation.id, 2000);
   } else {
     // Siswa sedang meminta data -> Cek apakah guru sudah menekan Keluar (Tutup)
+    // Cek dulu dari Database (paling kuat karena sync lintas proses VPS PM2)
+    if (presentation.isActive === false) {
+      return NextResponse.json({ error: "Teacher offline", closed: true });
+    }
+    
+    // Jika di database masih aktif, cek fallback dari RAM (opsional, tapi baik untuk menjaga redundansi)
     const teacherOnline = isTeacherActive(presentation.id);
     if (!teacherOnline) {
       return NextResponse.json({ error: "Teacher offline", closed: true });
