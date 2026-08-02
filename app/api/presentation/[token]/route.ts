@@ -40,11 +40,6 @@ export async function GET(
     if (presentation.isActive === false) {
       return NextResponse.json({ error: "Teacher offline", closed: true });
     }
-    
-    const teacherOnline = await isTeacherActive(presentation.id);
-    if (!teacherOnline) {
-      return NextResponse.json({ error: "Teacher offline", closed: true });
-    }
   }
 
   // Modifikasi path agar selalu menggunakan API route khusus (mencegah cache 'Content unavailable' pada VPS)
