@@ -118,7 +118,7 @@ export async function closePresentationAction(presentationId: string) {
 
 export async function joinPresentation(formData: FormData) {
   const name = formData.get("name") as string;
-  const token = formData.get("token") as string;
+  const token = (formData.get("token") as string).toUpperCase();
 
   const presentation = await prisma.presentation.findUnique({
     where: { token },

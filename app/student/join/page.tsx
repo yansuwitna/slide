@@ -47,6 +47,7 @@ export default function Join() {
               type="text"
               required
               placeholder="Masukkan 6 digit token"
+              onChange={(e) => (e.target.value = e.target.value.toUpperCase())}
               className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500 uppercase font-mono"
             />
           </div>
