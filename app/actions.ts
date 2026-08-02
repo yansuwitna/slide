@@ -128,9 +128,29 @@ export async function joinPresentation(formData: FormData) {
     return { error: "Token presentasi tidak valid" };
   }
 
-  await prisma.participant.create({
-    data: { name, presentationId: presentation.id },
+  let deviceId = cookies().get("deviceId")?.value;
+  if (!deviceId) {
+    deviceId = Math.random().toString(36).substring(2, 15);
+    cookies().set("deviceId", deviceId);
+  }
+
+  const existingParticipant = await prisma.participant.findFirst({
+    where: {
+      presentationId: presentation.id,
+      deviceId: deviceId
+    }
   });
+
+  if (existingParticipant) {
+    await prisma.participant.update({
+      where: { id: existingParticipant.id },
+      data: { name: name, lastSeen: new Date() }
+    });
+  } else {
+    await prisma.participant.create({
+      data: { name, presentationId: presentation.id, deviceId: deviceId },
+    });
+  }
 
   cookies().set("studentName", name);
   redirect(`/student/view/${token}`);

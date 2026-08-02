@@ -34,6 +34,7 @@ model Participant {
   presentationId String
   presentation   Presentation @relation(fields: [presentationId], references: [id], onDelete: Cascade)
   name           String
+  deviceId       String       @default("")
   joinedAt       DateTime     @default(now())
   lastSeen       DateTime     @default(now())
 }
